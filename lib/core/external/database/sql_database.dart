@@ -1,9 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-
 import '../../domain/failures/database_error.dart';
-import 'databse_service.dart';
+import 'database_service.dart';
 import 'sql/directory.dart';
 
 class SQLiteDatabase implements DatabaseService {
@@ -18,8 +17,12 @@ class SQLiteDatabase implements DatabaseService {
           version: 1,
           onCreate: (db, version) async {
             await db.execute(SQLDirectoryQueries.createTableDirectories);
+            await db.execute(SQLDirectoryQueries.createTriggerUpdateAt);
           },
         );
+
+        // Chamada para verificar e corrigir a tabela
+        await _checkAndFixDirectoriesTable();
       } catch (e, stacktrace) {
         if (kDebugMode) {
           print('Error: $e');
@@ -39,6 +42,46 @@ class SQLiteDatabase implements DatabaseService {
     await database;
   }
 
+  /// Verifica e corrige a tabela `directories` se necessário
+  Future<void> _checkAndFixDirectoriesTable() async {
+    try {
+      final db = await database;
+
+      // Verifica a estrutura da tabela
+      final result = await db.rawQuery("PRAGMA table_info(directories)");
+      final hasUniqueConstraint = result.any((column) =>
+          column['name'] == 'path' &&
+          column['pk'] == 0 &&
+          column['notnull'] == 1);
+
+      if (!hasUniqueConstraint) {
+        // Corrige a tabela recriando-a
+        await db.execute("ALTER TABLE directories RENAME TO old_directories");
+        await db.execute(SQLDirectoryQueries.createTableDirectories);
+        await db.execute(SQLDirectoryQueries.createTriggerUpdateAt);
+        await db.execute('''
+          INSERT INTO directories (id, path, created_at, updated_at)
+          SELECT id, path, created_at, updated_at FROM old_directories
+        ''');
+        await db.execute("DROP TABLE old_directories");
+
+        if (kDebugMode) {
+          print(
+              "Table `directories` was fixed with UNIQUE constraint on `path`.");
+        }
+      }
+    } catch (e, stacktrace) {
+      if (kDebugMode) {
+        print('Error fixing `directories` table: $e');
+        print('StackTrace: $stacktrace');
+      }
+      throw DatabaseError(
+        DatabaseErrorType.connectionError,
+        'Failed to verify or fix `directories` table: ${e.toString()}',
+      );
+    }
+  }
+
   @override
   Future<int> insert(String table, Map<String, dynamic> data) async {
     try {
@@ -46,7 +89,7 @@ class SQLiteDatabase implements DatabaseService {
       return await db.insert(
         table,
         data,
-        conflictAlgorithm: ConflictAlgorithm.replace,
+        conflictAlgorithm: ConflictAlgorithm.abort,
       );
     } catch (e, stacktrace) {
       if (kDebugMode) {
