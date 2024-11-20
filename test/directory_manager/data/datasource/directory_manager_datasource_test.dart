@@ -1,8 +1,10 @@
-import 'package:custom_cicd/core/external/database/database_service.dart';
-import 'package:custom_cicd/directory_manager/data/datasource/directory_manager_datasource.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+import 'package:custom_cicd/core/external/database/database_service.dart';
+import 'package:custom_cicd/directory_manager/data/datasource/directory_manager_datasource.dart';
 import 'package:custom_cicd/directory_manager/data/models/directory_model.dart';
+import 'package:custom_cicd/core/domain/failures/database_error.dart';
+import 'package:custom_cicd/directory_manager/domain/failures/diretory_error.dart';
 
 import '../../../mock/mocks.mocks.dart';
 
@@ -44,13 +46,56 @@ void main() {
       expect(result[1].path, '/home/user/project2');
     });
 
-    test('Should throw an exception when database query fails', () async {
-      when(mockDatabase.query('directories'))
-          .thenThrow(Exception('Database error'));
+    test('Should throw DirectoryError with databaseError when connection fails',
+        () async {
+      when(mockDatabase.query('directories')).thenThrow(
+        DatabaseError(
+          DatabaseErrorType.connectionError,
+          'Connection failed',
+        ),
+      );
 
       expect(
         () => datasource.get(),
-        throwsA(isA<Exception>()),
+        throwsA(
+          predicate<DirectoryError>(
+            (e) => e.type == TypeOfDiretoryError.databaseError,
+          ),
+        ),
+      );
+    });
+
+    test(
+        'Should throw DirectoryError with pathAlredyExists when insert error occurs',
+        () async {
+      when(mockDatabase.query('directories')).thenThrow(
+        DatabaseError(
+          DatabaseErrorType.insertError,
+          'Insert conflict',
+        ),
+      );
+
+      expect(
+        () => datasource.get(),
+        throwsA(
+          predicate<DirectoryError>(
+            (e) => e.type == TypeOfDiretoryError.pathAlredyExists,
+          ),
+        ),
+      );
+    });
+
+    test('Should throw DirectoryError with unknown type for generic errors',
+        () async {
+      when(mockDatabase.query('directories'))
+          .thenThrow(Exception('Unknown error'));
+
+      expect(
+        () => datasource.get(),
+        throwsA(
+          predicate<DirectoryError>(
+              (e) => e.type == TypeOfDiretoryError.unknown),
+        ),
       );
     });
   });

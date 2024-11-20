@@ -7,6 +7,10 @@ import 'dart:async' as _i3;
 
 import 'package:custom_cicd/core/external/database/database_service.dart'
     as _i2;
+import 'package:custom_cicd/directory_manager/data/datasource/directory_manager_datasource.dart'
+    as _i4;
+import 'package:custom_cicd/directory_manager/data/models/directory_model.dart'
+    as _i5;
 import 'package:mockito/mockito.dart' as _i1;
 
 // ignore_for_file: type=lint
@@ -124,4 +128,24 @@ class MockDatabaseService extends _i1.Mock implements _i2.DatabaseService {
         returnValue: _i3.Future<void>.value(),
         returnValueForMissingStub: _i3.Future<void>.value(),
       ) as _i3.Future<void>);
+}
+
+/// A class which mocks [DirectoryManagerDatasource].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockDirectoryManagerDatasource extends _i1.Mock
+    implements _i4.DirectoryManagerDatasource {
+  MockDirectoryManagerDatasource() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  _i3.Future<List<_i5.DirectoryModel>> get() => (super.noSuchMethod(
+        Invocation.method(
+          #get,
+          [],
+        ),
+        returnValue:
+            _i3.Future<List<_i5.DirectoryModel>>.value(<_i5.DirectoryModel>[]),
+      ) as _i3.Future<List<_i5.DirectoryModel>>);
 }

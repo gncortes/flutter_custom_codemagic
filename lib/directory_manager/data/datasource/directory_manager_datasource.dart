@@ -19,20 +19,22 @@ class DirectoryManagerDatasourceImpl implements DirectoryManagerDatasource {
 
       return response.map((map) => DirectoryModel.fromJson(map)).toList();
     } on DatabaseError catch (e) {
-      return switch (e.errorType) {
-        DatabaseErrorType.connectionError => throw DirectoryError(
+      final error = switch (e.errorType) {
+        DatabaseErrorType.connectionError => DirectoryError(
             message: e.toString(),
             type: TypeOfDiretoryError.databaseError,
           ),
-        DatabaseErrorType.insertError => throw DirectoryError(
+        DatabaseErrorType.insertError => DirectoryError(
             message: e.toString(),
             type: TypeOfDiretoryError.pathAlredyExists,
           ),
-        _ => throw DirectoryError(
+        _ => DirectoryError(
             message: e.toString(),
             type: TypeOfDiretoryError.unknown,
           )
       };
+
+      throw (error);
     } catch (e) {
       throw DirectoryError(
         message: e.toString(),
