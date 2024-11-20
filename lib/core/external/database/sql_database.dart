@@ -47,22 +47,25 @@ class SQLiteDatabase implements DatabaseService {
     try {
       final db = await database;
 
-      // Verifica a estrutura da tabela
-      final result = await db.rawQuery("PRAGMA table_info(directories)");
-      final hasUniqueConstraint = result.any((column) =>
-          column['name'] == 'path' &&
-          column['pk'] == 0 &&
-          column['notnull'] == 1);
+      // Verifica se há um índice UNIQUE na tabela directories
+      final indexInfo = await db.rawQuery("PRAGMA index_list('directories')");
+      final hasUniqueConstraint = indexInfo
+          .any((index) => index['name'] != null && index['unique'] == 1);
 
       if (!hasUniqueConstraint) {
-        // Corrige a tabela recriando-a
+        // Renomeie a tabela antiga
         await db.execute("ALTER TABLE directories RENAME TO old_directories");
+
+        // Crie a tabela corrigida com UNIQUE
         await db.execute(SQLDirectoryQueries.createTableDirectories);
-        await db.execute(SQLDirectoryQueries.createTriggerUpdateAt);
+
+        // Migre os dados da tabela antiga
         await db.execute('''
-          INSERT INTO directories (id, path, created_at, updated_at)
-          SELECT id, path, created_at, updated_at FROM old_directories
-        ''');
+        INSERT OR IGNORE INTO directories (id, path, created_at, updated_at)
+        SELECT id, path, created_at, updated_at FROM old_directories
+      ''');
+
+        // Exclua a tabela antiga
         await db.execute("DROP TABLE old_directories");
 
         if (kDebugMode) {
@@ -86,12 +89,15 @@ class SQLiteDatabase implements DatabaseService {
   Future<int> insert(String table, Map<String, dynamic> data) async {
     try {
       final db = await database;
-      return await db.insert(
+      final id = await db.insert(
         table,
         data,
         conflictAlgorithm: ConflictAlgorithm.abort,
       );
+      print(id);
+      return id;
     } catch (e, stacktrace) {
+      print('on stacktrace');
       if (kDebugMode) {
         print('Error: $e');
         print('StackTrace: $stacktrace');
