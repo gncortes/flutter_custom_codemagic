@@ -4,6 +4,7 @@ enum TypeOfDiretoryError {
   databaseError,
   pathIsEmpty,
   notFound,
+  pathAlredyExists,
   unknown,
 }
 

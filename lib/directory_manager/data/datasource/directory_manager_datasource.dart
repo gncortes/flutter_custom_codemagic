@@ -1,4 +1,6 @@
+import '../../../core/domain/failures/database_error.dart';
 import '../../../core/external/database/database_service.dart';
+import '../../domain/failures/diretory_error.dart';
 import '../models/directory_model.dart';
 
 abstract interface class DirectoryManagerDatasource {
@@ -12,8 +14,30 @@ class DirectoryManagerDatasourceImpl implements DirectoryManagerDatasource {
 
   @override
   Future<List<DirectoryModel>> get() async {
-    final response = await _database.query('directories');
+    try {
+      final response = await _database.query('directories');
 
-    return response.map((map) => DirectoryModel.fromJson(map)).toList();
+      return response.map((map) => DirectoryModel.fromJson(map)).toList();
+    } on DatabaseError catch (e) {
+      return switch (e.errorType) {
+        DatabaseErrorType.connectionError => throw DirectoryError(
+            message: e.toString(),
+            type: TypeOfDiretoryError.databaseError,
+          ),
+        DatabaseErrorType.insertError => throw DirectoryError(
+            message: e.toString(),
+            type: TypeOfDiretoryError.pathAlredyExists,
+          ),
+        _ => throw DirectoryError(
+            message: e.toString(),
+            type: TypeOfDiretoryError.unknown,
+          )
+      };
+    } catch (e) {
+      throw DirectoryError(
+        message: e.toString(),
+        type: TypeOfDiretoryError.unknown,
+      );
+    }
   }
 }

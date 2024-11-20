@@ -19,11 +19,16 @@ class DirectoryManagerRepositoryImpl implements DirectoryManagerRepository {
       final entities = models.map((model) => model.toEntity()).toList();
 
       return Right(entities);
+    } on DirectoryError catch (e) {
+      return Left(e);
+    } on AssertionError catch (e) {
+      return Left(
+        DirectoryError(
+          message: e.toString(),
+          type: TypeOfDiretoryError.pathIsEmpty,
+        ),
+      );
     } catch (e) {
-      if (e is DirectoryError) {
-        return Left(e);
-      }
-
       return const Left(
         DirectoryError(
           message: 'Failed to fetch directories',
