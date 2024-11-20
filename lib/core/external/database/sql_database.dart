@@ -94,10 +94,9 @@ class SQLiteDatabase implements DatabaseService {
         data,
         conflictAlgorithm: ConflictAlgorithm.abort,
       );
-      print(id);
+
       return id;
     } catch (e, stacktrace) {
-      print('on stacktrace');
       if (kDebugMode) {
         print('Error: $e');
         print('StackTrace: $stacktrace');
