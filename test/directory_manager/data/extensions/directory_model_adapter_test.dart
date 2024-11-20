@@ -37,5 +37,21 @@ void main() {
         throwsA(isA<FormatException>()),
       );
     });
+
+    test('Should throw an error if path is empty', () {
+      final json = {
+        'id': 1,
+        'path': '',
+        'created_at': '2023-01-01T10:00:00',
+        'updated_at': '2023-01-02T12:00:00',
+      };
+
+      final model = DirectoryModel.fromJson(json);
+
+      expect(
+        () => model.toEntity(),
+        throwsA(isA<AssertionError>()), // Se a validação for via assert
+      );
+    });
   });
 }
