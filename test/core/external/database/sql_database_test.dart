@@ -55,28 +55,48 @@ void main() {
       expect(result[0]['path'], '/home/user/project1');
     });
 
-    test('Should update a record in the directories table', () async {
+    test(
+        'Should update a record in the directories table and update updated_at',
+        () async {
       final data = {'path': '/home/user/old_project'};
       final id = await database.insert('directories', data);
 
+      final resultCreate = await database.query(
+        'directories',
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+
+      final updatedAtCreate = resultCreate[0]['updated_at'];
+
+      expect(updatedAtCreate, isNotNull);
+
+      await Future.delayed(const Duration(seconds: 2));
+
       final updatedRows = await database.update(
         'directories',
-        {
-          'path': '/home/user/new_project',
-          'updated_at': DateTime.now().toIso8601String(),
-        },
+        {'path': '/home/user/new_project'},
         where: 'id = ?',
         whereArgs: [id],
       );
 
       expect(updatedRows, 1);
 
-      final result = await database.query(
+      final resultUpdate = await database.query(
         'directories',
         where: 'id = ?',
         whereArgs: [id],
       );
-      expect(result[0]['path'], '/home/user/new_project');
+
+      final updatedAtUpdate = resultUpdate[0]['updated_at'];
+
+      expect(resultUpdate[0]['path'], '/home/user/new_project');
+      expect(updatedAtUpdate, isNotNull);
+
+      expect(
+        updatedAtUpdate == updatedAtCreate,
+        isFalse,
+      );
     });
 
     test('Should delete a record from the directories table', () async {

@@ -9,12 +9,14 @@ class SQLDirectoryQueries {
   ''';
 
   static const createTriggerUpdateAt = '''
-    CREATE TRIGGER update_updated_at
-    AFTER UPDATE ON directories
+  CREATE TRIGGER update_updated_at
+    BEFORE UPDATE ON directories
+    FOR EACH ROW
+    WHEN OLD.path != NEW.path
     BEGIN
       UPDATE directories
       SET updated_at = CURRENT_TIMESTAMP
-      WHERE id = NEW.id;
+      WHERE id = OLD.id;
     END;
   ''';
 }
