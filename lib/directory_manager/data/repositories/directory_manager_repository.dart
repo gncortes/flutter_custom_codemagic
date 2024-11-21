@@ -1,3 +1,5 @@
+import 'package:custom_cicd/directory_manager/domain/input/add_directory.dart';
+
 import '../extensions/directory_model_adapter.dart';
 import 'package:dartz/dartz.dart';
 
@@ -36,5 +38,11 @@ class DirectoryManagerRepositoryImpl implements DirectoryManagerRepository {
         ),
       );
     }
+  }
+
+  @override
+  Future<Either<DirectoryError, DirectoryEntity>> add(AddDirectoryInput input) {
+    // TODO: implement add
+    throw UnimplementedError();
   }
 }
