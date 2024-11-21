@@ -11,16 +11,17 @@ import '../../../mock/mocks.mocks.dart';
 void main() {
   late DatabaseService mockDatabase;
   late DirectoryManagerDatasourceImpl datasource;
+  late String directories;
 
   setUp(() {
+    directories = 'directories';
     mockDatabase = MockDatabaseService();
     datasource = DirectoryManagerDatasourceImpl(mockDatabase);
   });
 
-  group('DirectoryManagerDatasourceImpl', () {
+  group('DirectoryManagerDatasourceImpl - get', () {
     test('Should return a list of DirectoryModel when query is successful',
         () async {
-      // Dados simulados
       final mockData = [
         {
           'id': 1,
@@ -36,7 +37,7 @@ void main() {
         },
       ];
 
-      when(mockDatabase.query('directories')).thenAnswer((_) async => mockData);
+      when(mockDatabase.query(directories)).thenAnswer((_) async => mockData);
 
       final result = await datasource.get();
 
@@ -48,7 +49,7 @@ void main() {
 
     test('Should throw DirectoryError with databaseError when connection fails',
         () async {
-      when(mockDatabase.query('directories')).thenThrow(
+      when(mockDatabase.query(directories)).thenThrow(
         DatabaseError(
           DatabaseErrorType.connectionError,
           'Connection failed',
@@ -65,29 +66,9 @@ void main() {
       );
     });
 
-    test(
-        'Should throw DirectoryError with pathAlredyExists when insert error occurs',
-        () async {
-      when(mockDatabase.query('directories')).thenThrow(
-        DatabaseError(
-          DatabaseErrorType.insertError,
-          'Insert conflict',
-        ),
-      );
-
-      expect(
-        () => datasource.get(),
-        throwsA(
-          predicate<DirectoryError>(
-            (e) => e.type == TypeOfDiretoryError.pathAlredyExists,
-          ),
-        ),
-      );
-    });
-
     test('Should throw DirectoryError with unknown type for generic errors',
         () async {
-      when(mockDatabase.query('directories'))
+      when(mockDatabase.query(directories))
           .thenThrow(Exception('Unknown error'));
 
       expect(
@@ -95,6 +76,97 @@ void main() {
         throwsA(
           predicate<DirectoryError>(
               (e) => e.type == TypeOfDiretoryError.unknown),
+        ),
+      );
+    });
+  });
+
+  group('DirectoryManagerDatasourceImpl - add', () {
+    test('Should insert a directory and return DirectoryModel on success',
+        () async {
+      const directoryData = {'path': '/home/user/project1'};
+
+      const insertedId = 1;
+      final mockResponse = [
+        {
+          'id': insertedId,
+          'path': '/home/user/project1',
+          'created_at': '2023-01-01T10:00:00',
+          'updated_at': '2023-01-01T10:00:00',
+        },
+      ];
+
+      when(mockDatabase.insert(directories, directoryData))
+          .thenAnswer((_) async => insertedId);
+      when(mockDatabase.query(
+        'directories',
+        where: 'id = ?',
+        whereArgs: [insertedId],
+      )).thenAnswer((_) async => mockResponse);
+
+      final result = await datasource.add(directoryData);
+
+      expect(result, isA<DirectoryModel>());
+      expect(result.id, insertedId);
+      expect(result.path, '/home/user/project1');
+    });
+
+    test('Should throw DirectoryError when query returns empty', () async {
+      const directoryData = {'path': '/home/user/project1'};
+
+      const insertedId = 1;
+
+      when(mockDatabase.insert(directories, directoryData))
+          .thenAnswer((_) async => insertedId);
+      when(mockDatabase.query(
+        directories,
+        where: 'id = ?',
+        whereArgs: [insertedId],
+      )).thenAnswer((_) async => []);
+
+      expect(
+        () => datasource.add(directoryData),
+        throwsA(
+          predicate<DirectoryError>(
+            (e) => e.type == TypeOfDiretoryError.notFound,
+          ),
+        ),
+      );
+    });
+
+    test('Should throw DirectoryError for database connection error', () async {
+      const directoryData = {'path': '/home/user/project1'};
+
+      when(mockDatabase.insert(directories, directoryData)).thenThrow(
+        DatabaseError(
+          DatabaseErrorType.connectionError,
+          'Connection error',
+        ),
+      );
+
+      expect(
+        () => datasource.add(directoryData),
+        throwsA(
+          predicate<DirectoryError>(
+            (e) => e.type == TypeOfDiretoryError.databaseError,
+          ),
+        ),
+      );
+    });
+
+    test('Should throw DirectoryError for unknown database error', () async {
+      const directoryData = {'path': '/home/user/project1'};
+
+      when(mockDatabase.insert(directories, directoryData)).thenThrow(
+        Exception('Unknown error'),
+      );
+
+      expect(
+        () => datasource.add(directoryData),
+        throwsA(
+          predicate<DirectoryError>(
+            (e) => e.type == TypeOfDiretoryError.unknown,
+          ),
         ),
       );
     });

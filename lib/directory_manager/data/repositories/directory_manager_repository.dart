@@ -41,7 +41,9 @@ class DirectoryManagerRepositoryImpl implements DirectoryManagerRepository {
   }
 
   @override
-  Future<Either<DirectoryError, DirectoryEntity>> add(AddDirectoryInput input) {
+  Future<Either<DirectoryError, DirectoryEntity>> add(
+    AddDirectoryInput input,
+  ) async {
     // TODO: implement add
     throw UnimplementedError();
   }
