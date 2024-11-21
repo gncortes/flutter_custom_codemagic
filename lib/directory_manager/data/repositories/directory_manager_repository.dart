@@ -1,4 +1,5 @@
-import 'package:custom_cicd/directory_manager/domain/input/add_directory.dart';
+import '../extensions/add_directory_adapter.dart';
+import '../../domain/input/add_directory.dart';
 
 import '../extensions/directory_model_adapter.dart';
 import 'package:dartz/dartz.dart';
@@ -44,7 +45,26 @@ class DirectoryManagerRepositoryImpl implements DirectoryManagerRepository {
   Future<Either<DirectoryError, DirectoryEntity>> add(
     AddDirectoryInput input,
   ) async {
-    // TODO: implement add
-    throw UnimplementedError();
+    try {
+      final response = await datasource.add(input.toJson());
+
+      return Right(response.toEntity());
+    } on DirectoryError catch (e) {
+      return Left(e);
+    } on AssertionError catch (e) {
+      return Left(
+        DirectoryError(
+          message: e.toString(),
+          type: TypeOfDiretoryError.pathIsEmpty,
+        ),
+      );
+    } catch (e) {
+      return const Left(
+        DirectoryError(
+          message: 'Failed to fetch directories',
+          type: TypeOfDiretoryError.unknown,
+        ),
+      );
+    }
   }
 }

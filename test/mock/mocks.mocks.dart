@@ -3,14 +3,14 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i3;
+import 'dart:async' as _i4;
 
 import 'package:custom_cicd/core/external/database/database_service.dart'
-    as _i2;
+    as _i3;
 import 'package:custom_cicd/directory_manager/data/datasource/directory_manager_datasource.dart'
-    as _i4;
-import 'package:custom_cicd/directory_manager/data/models/directory_model.dart'
     as _i5;
+import 'package:custom_cicd/directory_manager/data/models/directory_model.dart'
+    as _i2;
 import 'package:mockito/mockito.dart' as _i1;
 
 // ignore_for_file: type=lint
@@ -26,26 +26,37 @@ import 'package:mockito/mockito.dart' as _i1;
 // ignore_for_file: camel_case_types
 // ignore_for_file: subtype_of_sealed_class
 
+class _FakeDirectoryModel_0 extends _i1.SmartFake
+    implements _i2.DirectoryModel {
+  _FakeDirectoryModel_0(
+    Object parent,
+    Invocation parentInvocation,
+  ) : super(
+          parent,
+          parentInvocation,
+        );
+}
+
 /// A class which mocks [DatabaseService].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockDatabaseService extends _i1.Mock implements _i2.DatabaseService {
+class MockDatabaseService extends _i1.Mock implements _i3.DatabaseService {
   MockDatabaseService() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i3.Future<void> init() => (super.noSuchMethod(
+  _i4.Future<void> init() => (super.noSuchMethod(
         Invocation.method(
           #init,
           [],
         ),
-        returnValue: _i3.Future<void>.value(),
-        returnValueForMissingStub: _i3.Future<void>.value(),
-      ) as _i3.Future<void>);
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
 
   @override
-  _i3.Future<int> insert(
+  _i4.Future<int> insert(
     String? table,
     Map<String, dynamic>? data,
   ) =>
@@ -57,11 +68,11 @@ class MockDatabaseService extends _i1.Mock implements _i2.DatabaseService {
             data,
           ],
         ),
-        returnValue: _i3.Future<int>.value(0),
-      ) as _i3.Future<int>);
+        returnValue: _i4.Future<int>.value(0),
+      ) as _i4.Future<int>);
 
   @override
-  _i3.Future<List<Map<String, dynamic>>> query(
+  _i4.Future<List<Map<String, dynamic>>> query(
     String? table, {
     String? where,
     List<dynamic>? whereArgs,
@@ -75,12 +86,12 @@ class MockDatabaseService extends _i1.Mock implements _i2.DatabaseService {
             #whereArgs: whereArgs,
           },
         ),
-        returnValue: _i3.Future<List<Map<String, dynamic>>>.value(
+        returnValue: _i4.Future<List<Map<String, dynamic>>>.value(
             <Map<String, dynamic>>[]),
-      ) as _i3.Future<List<Map<String, dynamic>>>);
+      ) as _i4.Future<List<Map<String, dynamic>>>);
 
   @override
-  _i3.Future<int> update(
+  _i4.Future<int> update(
     String? table,
     Map<String, dynamic>? data, {
     String? where,
@@ -98,11 +109,11 @@ class MockDatabaseService extends _i1.Mock implements _i2.DatabaseService {
             #whereArgs: whereArgs,
           },
         ),
-        returnValue: _i3.Future<int>.value(0),
-      ) as _i3.Future<int>);
+        returnValue: _i4.Future<int>.value(0),
+      ) as _i4.Future<int>);
 
   @override
-  _i3.Future<int> delete(
+  _i4.Future<int> delete(
     String? table, {
     String? where,
     List<dynamic>? whereArgs,
@@ -116,36 +127,52 @@ class MockDatabaseService extends _i1.Mock implements _i2.DatabaseService {
             #whereArgs: whereArgs,
           },
         ),
-        returnValue: _i3.Future<int>.value(0),
-      ) as _i3.Future<int>);
+        returnValue: _i4.Future<int>.value(0),
+      ) as _i4.Future<int>);
 
   @override
-  _i3.Future<void> close() => (super.noSuchMethod(
+  _i4.Future<void> close() => (super.noSuchMethod(
         Invocation.method(
           #close,
           [],
         ),
-        returnValue: _i3.Future<void>.value(),
-        returnValueForMissingStub: _i3.Future<void>.value(),
-      ) as _i3.Future<void>);
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
 }
 
 /// A class which mocks [DirectoryManagerDatasource].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockDirectoryManagerDatasource extends _i1.Mock
-    implements _i4.DirectoryManagerDatasource {
+    implements _i5.DirectoryManagerDatasource {
   MockDirectoryManagerDatasource() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i3.Future<List<_i5.DirectoryModel>> get() => (super.noSuchMethod(
+  _i4.Future<List<_i2.DirectoryModel>> get() => (super.noSuchMethod(
         Invocation.method(
           #get,
           [],
         ),
         returnValue:
-            _i3.Future<List<_i5.DirectoryModel>>.value(<_i5.DirectoryModel>[]),
-      ) as _i3.Future<List<_i5.DirectoryModel>>);
+            _i4.Future<List<_i2.DirectoryModel>>.value(<_i2.DirectoryModel>[]),
+      ) as _i4.Future<List<_i2.DirectoryModel>>);
+
+  @override
+  _i4.Future<_i2.DirectoryModel> add(Map<String, dynamic>? data) =>
+      (super.noSuchMethod(
+        Invocation.method(
+          #add,
+          [data],
+        ),
+        returnValue: _i4.Future<_i2.DirectoryModel>.value(_FakeDirectoryModel_0(
+          this,
+          Invocation.method(
+            #add,
+            [data],
+          ),
+        )),
+      ) as _i4.Future<_i2.DirectoryModel>);
 }
