@@ -7,6 +7,8 @@ abstract interface class DirectoryManagerDatasource {
   Future<List<DirectoryModel>> get();
 
   Future<DirectoryModel> add(Map<String, dynamic> data);
+
+  Future<DirectoryModel> update(int id, Map<String, dynamic> data);
 }
 
 class DirectoryManagerDatasourceImpl implements DirectoryManagerDatasource {
@@ -52,6 +54,60 @@ class DirectoryManagerDatasourceImpl implements DirectoryManagerDatasource {
         _table,
         where: 'id = ?',
         whereArgs: [id],
+      );
+
+      if (response.isEmpty) {
+        throw (const DirectoryError(
+          message: 'Not found',
+          type: TypeOfDiretoryError.notFound,
+        ));
+      }
+
+      return DirectoryModel.fromJson(response.first);
+    } on DatabaseError catch (e) {
+      final error = switch (e.errorType) {
+        DatabaseErrorType.connectionError => DirectoryError(
+            message: e.toString(),
+            type: TypeOfDiretoryError.databaseError,
+          ),
+        DatabaseErrorType.insertError => DirectoryError(
+            message: e.toString(),
+            type: TypeOfDiretoryError.pathAlredyExists,
+          ),
+        _ => DirectoryError(
+            message: e.toString(),
+            type: TypeOfDiretoryError.unknown,
+          )
+      };
+
+      throw (error);
+    } on DirectoryError {
+      rethrow;
+    } catch (e) {
+      throw DirectoryError(
+        message: e.toString(),
+        type: TypeOfDiretoryError.unknown,
+      );
+    }
+  }
+
+  @override
+  Future<DirectoryModel> update(
+    int id,
+    Map<String, dynamic> data,
+  ) async {
+    try {
+      final updateId = await _database.update(
+        _table,
+        data,
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+
+      final response = await _database.query(
+        _table,
+        where: 'id = ?',
+        whereArgs: [updateId],
       );
 
       if (response.isEmpty) {
