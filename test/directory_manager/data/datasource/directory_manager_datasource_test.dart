@@ -128,7 +128,9 @@ void main() {
         () => datasource.add(directoryData),
         throwsA(
           predicate<DirectoryError>(
-            (e) => e.type == TypeOfDiretoryError.notFound,
+            (e) {
+              return e.type == TypeOfDiretoryError.notFound;
+            },
           ),
         ),
       );

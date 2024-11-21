@@ -79,6 +79,8 @@ class DirectoryManagerDatasourceImpl implements DirectoryManagerDatasource {
       };
 
       throw (error);
+    } on DirectoryError {
+      rethrow;
     } catch (e) {
       throw DirectoryError(
         message: e.toString(),
