@@ -173,4 +173,6 @@ void main() {
       );
     });
   });
+
+  group('DirectoryManagerDatasourceImpl - update', () {});
 }
